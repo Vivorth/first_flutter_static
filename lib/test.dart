@@ -1,13 +1,18 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:test_flutter/load.dart';
 
-void main() => runApp(MaterialApp(
-  home: secondpage(),
-));
+Future <void> main() async{
+
+  runApp(MaterialApp(
+    home: secondpage(),
+  ));
+}
 
 class secondpage extends StatefulWidget{
   _secondpage createState() => _secondpage();
@@ -15,7 +20,25 @@ class secondpage extends StatefulWidget{
 
 class _secondpage extends State<secondpage>{
 
-
+  String data;
+retrieveData(){
+    CollectionReference collectionReference = Firestore.instance.collection("Drama");
+    collectionReference.snapshots().listen((snapshot) {
+      setState(() {
+       data = snapshot.docs[0].get("athireach"); // name of field
+      });
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    Firebase.initializeApp().whenComplete(() { // to initilize firebase
+      print("completed");
+      setState(() {
+        retrieveData();
+      });
+    });
+  }
   @override
   Widget build(BuildContext context) {
     List<String> list = ["1","2","3","4"];
@@ -30,30 +53,44 @@ class _secondpage extends State<secondpage>{
         IconButton(icon: Icon(Icons.favorite),disabledColor: Colors.white, )],
       ),
       body: Container(
-        height: 210,
         margin: const EdgeInsets.all(10),
         
-        child: ListView.builder(
-
-    scrollDirection: Axis.horizontal,
-    itemCount: list.length, //length of the list
-    itemBuilder: (context,index) { // layout of each item
-
-      return GestureDetector(
-
-        onTap: ()=>Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => load()), // to go to next activity
-        ),
         child: Column(
+          children: [
+            Container(
+              height: 210,
 
-          crossAxisAlignment: CrossAxisAlignment.start,
+              child: ListView.builder(
 
-          children: [Image.asset('assets/images/setec.jpg',fit: BoxFit.fitHeight,height: 150,width: 100,),Text(list[index],)],
-        ),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: list.length, //length of the list
+                  itemBuilder: (context,index) { // layout of each item
 
-      );
-    }),
+                    return GestureDetector(
+
+                      onTap: ()=>Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => load()), // to go to next activity
+                      ),
+                      child: Column(
+
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [Image.asset('assets/images/setec.jpg',fit: BoxFit.fitHeight,height: 150,width: 100,),Text(list[index],)],
+                      ),
+
+                    );
+
+                  }),
+            ),
+
+            Text(
+              data.toString()
+            )
+
+          ],
+        )
+
       ),
 
 
